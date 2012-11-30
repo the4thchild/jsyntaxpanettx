@@ -510,12 +510,12 @@ public class DefaultSyntaxKit extends StyledEditorKit implements ViewFactory {
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			String[] fonts = ge.getAvailableFontFamilyNames();
 			Arrays.sort(fonts);
-			if (Arrays.binarySearch(fonts, "Courier New") >= 0) {
+			if (Arrays.binarySearch(fonts, "Monospaced") >= 0) {
+				DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 12);
+			} else if (Arrays.binarySearch(fonts, "Courier New") >= 0) {
 				DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 12);
 			} else if (Arrays.binarySearch(fonts, "Courier") >= 0) {
 				DEFAULT_FONT = new Font("Courier", Font.PLAIN, 12);
-			} else if (Arrays.binarySearch(fonts, "Monospaced") >= 0) {
-				DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 13);
 			}
 		}
 
