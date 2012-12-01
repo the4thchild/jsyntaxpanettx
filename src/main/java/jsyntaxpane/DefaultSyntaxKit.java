@@ -511,6 +511,10 @@ public class DefaultSyntaxKit extends StyledEditorKit implements ViewFactory {
 			String[] fonts = ge.getAvailableFontFamilyNames();
 			Arrays.sort(fonts);
 			if (Arrays.binarySearch(fonts, "Monospaced") >= 0) {
+				// TTX UPDATE: makes Monospaced the default fallback font
+				// for improved consitency among different platforms and
+				// because Courer New text can be thin and hard to read on
+				// Mac platforms
 				DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 12);
 			} else if (Arrays.binarySearch(fonts, "Courier New") >= 0) {
 				DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 12);
