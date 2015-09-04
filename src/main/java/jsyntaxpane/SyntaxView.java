@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Element;
 import javax.swing.text.PlainView;
 import javax.swing.text.Segment;
@@ -65,7 +66,7 @@ public class SyntaxView extends PlainView {
         setRenderingHits((Graphics2D) graphics);
         Font saveFont = graphics.getFont();
         Color saveColor = graphics.getColor();
-        SyntaxDocument doc = (SyntaxDocument) getDocument();
+        DefaultStyledDocument doc = (DefaultStyledDocument) getDocument();
         Segment segment = getLineBuffer();
         // Draw the right margin first, if needed.  This way the text overalys
         // the margin
@@ -77,35 +78,38 @@ public class SyntaxView extends PlainView {
         }
         try {
             // Colour the parts
-            Iterator<Token> i = doc.getTokens(p0, p1);
-            int start = p0;
-            while (i.hasNext()) {
-                Token t = i.next();
-                // if there is a gap between the next token start and where we
-                // should be starting (spaces not returned in tokens), then draw
-                // it in the default type
-                if (start < t.start) {
-                    doc.getText(start, t.start - start, segment);
-                    x = DEFAULT_STYLE.drawText(segment, x, y, graphics, this, start);
-                }
-                // t and s are the actual start and length of what we should
-                // put on the screen.  assume these are the whole token....
-                int l = t.length;
-                int s = t.start;
-                // ... unless the token starts before p0:
-                if (s < p0) {
-                    // token is before what is requested. adgust the length and s
-                    l -= (p0 - s);
-                    s = p0;
-                }
-                // if token end (s + l is still the token end pos) is greater 
-                // than p1, then just put up to p1
-                if (s + l > p1) {
-                    l = p1 - s;
-                }
-                doc.getText(s, l, segment);
-                x = styles.drawText(segment, x, y, graphics, this, t);
-                start = t.end();
+			int start = p0;
+            if (doc instanceof SyntaxDocument) {
+            	SyntaxDocument synDoc = (SyntaxDocument) doc;
+				Iterator<Token> i = synDoc.getTokens(p0, p1);
+				while (i.hasNext()) {
+					Token t = i.next();
+					// if there is a gap between the next token start and where we
+					// should be starting (spaces not returned in tokens), then draw
+					// it in the default type
+					if (start < t.start) {
+						doc.getText(start, t.start - start, segment);
+						x = DEFAULT_STYLE.drawText(segment, x, y, graphics, this, start);
+					}
+					// t and s are the actual start and length of what we should
+					// put on the screen.  assume these are the whole token....
+					int l = t.length;
+					int s = t.start;
+					// ... unless the token starts before p0:
+					if (s < p0) {
+						// token is before what is requested. adgust the length and s
+						l -= (p0 - s);
+						s = p0;
+					}
+					// if token end (s + l is still the token end pos) is greater 
+					// than p1, then just put up to p1
+					if (s + l > p1) {
+						l = p1 - s;
+					}
+					doc.getText(s, l, segment);
+					x = styles.drawText(segment, x, y, graphics, this, t);
+					start = t.end();
+				}
             }
             // now for any remaining text not tokenized:
             if (start < p1) {

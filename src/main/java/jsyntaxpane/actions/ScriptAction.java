@@ -97,8 +97,13 @@ public class ScriptAction extends DefaultSyntaxAction {
 	}
 
 	private void showScriptError(JTextComponent target, Exception ex) {
+		// 2015-09-03: turning off error dialog while debugging action access 
+		// errors when running on Java 8
+		ex.printStackTrace();
+		/*
 		JOptionPane.showMessageDialog(target, ex.getMessage(),
 			java.util.ResourceBundle.getBundle("jsyntaxpane/Bundle").getString("ScriptAction.ErrorInScript"), JOptionPane.WARNING_MESSAGE);
+		*/
 	}
 	/**
 	 * The key used to store the Script Name for the this action
