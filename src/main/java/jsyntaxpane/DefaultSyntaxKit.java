@@ -111,6 +111,9 @@ public class DefaultSyntaxKit extends StyledEditorKit implements ViewFactory {
 		}
 	}
 	private static final String ACTION_MENU_TEXT = "MenuText";
+	
+	// TTX: adding font size setting
+	private static int fontSize = 12;
 
 	/**
 	 * Create a new Kit for the given language
@@ -504,6 +507,7 @@ public class DefaultSyntaxKit extends StyledEditorKit implements ViewFactory {
 	public synchronized static void initKit() {
 		// attempt to find a suitable default font
 		String defaultFont = getConfig(DefaultSyntaxKit.class).getString("DefaultFont");
+		int size = getFontSize();
 		if (defaultFont != null) {
 			DEFAULT_FONT = Font.decode(defaultFont);
 		} else {
@@ -515,11 +519,11 @@ public class DefaultSyntaxKit extends StyledEditorKit implements ViewFactory {
 				// for improved consitency among different platforms and
 				// because Courer New text can be thin and hard to read on
 				// Mac platforms
-				DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 12);
+				DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, size);
 			} else if (Arrays.binarySearch(fonts, "Courier New") >= 0) {
-				DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 12);
+				DEFAULT_FONT = new Font("Courier New", Font.PLAIN, size);
 			} else if (Arrays.binarySearch(fonts, "Courier") >= 0) {
-				DEFAULT_FONT = new Font("Courier", Font.PLAIN, 12);
+				DEFAULT_FONT = new Font("Courier", Font.PLAIN, size);
 			}
 		}
 
@@ -691,4 +695,7 @@ public class DefaultSyntaxKit extends StyledEditorKit implements ViewFactory {
 	public String getContentType() {
 		return "text/" + this.getClass().getSimpleName().replace("SyntaxKit", "").toLowerCase();
 	}
+	
+	public static void setFontSize(int val) { fontSize = val; }
+	public static int getFontSize() { return fontSize; }
 }
