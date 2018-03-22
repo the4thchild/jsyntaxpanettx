@@ -13,6 +13,8 @@
  */
 package jsyntaxpane;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -23,12 +25,14 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.event.DocumentEvent;
+import javax.swing.event.UndoableEditEvent;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Segment;
+import javax.swing.undo.UndoManager;
 
 // CHANGED: extends DefaultSytledDocument instead of PlainDocument
 // to allow integration into JTextPane
@@ -41,10 +45,18 @@ import javax.swing.text.Segment;
  * @author Ayman Al-Sairafi
  */
 public class SyntaxDocument extends DefaultStyledDocument {
-
+	public static final String CAN_UNDO = "can-undo";
+	public static final String CAN_REDO = "can-redo";
+	
+	private static final Logger logger= Logger.getLogger(
+			SyntaxDocument.class.getName());
 	Lexer lexer;
 	List<Token> tokens;
-	CompoundUndoMan undo;
+	UndoManager undo;
+	
+	private final PropertyChangeSupport propSupport;
+	private boolean canUndoState = false;
+	private boolean canRedoState = false;
 
 	public SyntaxDocument(Lexer lexer) {
 		super();
@@ -52,6 +64,28 @@ public class SyntaxDocument extends DefaultStyledDocument {
 		this.lexer = lexer;
 		// Listen for undo and redo events
 		undo = new CompoundUndoMan(this);
+		propSupport = new PropertyChangeSupport(this);
+	}
+	
+	/**
+	 * Set the undo manager since Java 9 changed the way that CompoundEdit 
+	 * is handled, and a custom manager needs to be added instead.
+	 *
+	 * @param undo an undo manager
+	 * @see https://bugs.openjdk.java.net/browse/JDK-8190763
+	 */
+	public void setUndoManager(UndoManager undo) {
+		logger.fine("setUndoManager(" + undo + ")");
+		if (this.undo != null) {
+			logger.fine("removing old manager" + this.undo);
+			this.removeUndoableEditListener(this.undo);
+		}
+		this.undo = undo;
+		this.addUndoableEditListener(this.undo);
+	}
+	
+	public void resetUndo() {
+		undo.discardAllEdits();
 	}
 	
 	// ADDED: tracks parsing progress
@@ -356,6 +390,28 @@ public class SyntaxDocument extends DefaultStyledDocument {
 
 		return p;
 	}
+	
+	public void setCanUndo(boolean val) {
+		if (canUndoState != val) {
+			canUndoState = val;
+			propSupport.firePropertyChange(CAN_UNDO, !val, val);
+		}
+	}
+	
+	public void setCanRedo(boolean val) {
+		if (canRedoState != val) {
+			canRedoState = val;
+			propSupport.firePropertyChange(CAN_REDO, !val, val);
+		}
+	}
+	
+	public boolean canUndo() {
+		return undo.canUndo();
+	}
+	
+	public boolean canRedo() {
+		return undo.canRedo();
+	}
 
 	/**
 	 * Perform an undo action, if possible
@@ -583,7 +639,10 @@ public class SyntaxDocument extends DefaultStyledDocument {
 	@Override
 	public void replace(int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
 		remove(offset, length);
-		undo.startCombine();
+		//undo.startCombine();
+		if (undo instanceof CompoundUndoMan) {
+			((CompoundUndoMan)undo).startCombine();
+		}
 		insertString(offset, text, attrs);
 	}
 
