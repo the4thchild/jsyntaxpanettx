@@ -13,10 +13,12 @@
  */
 package jsyntaxpane;
 
+import java.util.logging.Logger;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AbstractDocument.DefaultDocumentEvent;
 import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
@@ -32,11 +34,18 @@ import javax.swing.undo.UndoableEdit;
  * from the blog:
  *
  * http://tips4java.wordpress.com/2008/10/27/compound-undo-manager/
+ * 
+ * Additional support for compound edits in Java 9+ from:
+ * 
+ * https://github.com/jbfaden/jsyntaxpane
  *
  * @author Ayman Al-Sairafi
  */
 public class CompoundUndoMan extends UndoManager {
 
+	private static final Logger logger = Logger.getLogger(
+			CompoundUndoMan.class.getName());
+	private final SyntaxDocument doc;
 	private CompoundEdit compoundEdit;
 	// This allows us to start combining operations.
 	// it will be reset after the first change.
@@ -46,6 +55,7 @@ public class CompoundUndoMan extends UndoManager {
 	private int	lastLine = -1;
 
 	public CompoundUndoMan(SyntaxDocument doc) {
+		this.doc = doc;
 		doc.addUndoableEditListener(this);
 		lastLine = doc.getStartPosition().getOffset();
 	}
@@ -57,31 +67,71 @@ public class CompoundUndoMan extends UndoManager {
 	@Override
 	public void undoableEditHappened(UndoableEditEvent e) {
 		//  Start a new compound edit
-
-		AbstractDocument.DefaultDocumentEvent docEvt = (DefaultDocumentEvent) e.getEdit();
-
-		if (compoundEdit == null) {
+		
+		UndoableEdit edt = e.getEdit();
+		
+		if (edt instanceof DefaultDocumentEvent) {
+	
+			AbstractDocument.DefaultDocumentEvent docEvt = (DefaultDocumentEvent) e.getEdit();
+	
+			if (compoundEdit == null) {
+				compoundEdit = startCompoundEdit(e.getEdit());
+				startCombine = false;
+				updateDocUndoFlags();
+				return;
+			}
+			
+			int editLine = ((SyntaxDocument)docEvt.getDocument()).getLineNumberAt(docEvt.getOffset());
+	
+			//  Check for an incremental edit or backspace.
+			//  The Change in Caret position and Document length should both be
+			//  either 1 or -1.
+			if ((startCombine || Math.abs(docEvt.getLength()) == 1) && editLine == lastLine) {
+				compoundEdit.addEdit(e.getEdit());
+				startCombine = false;
+				updateDocUndoFlags();
+				return;
+			}
+			
+			//  Not incremental edit, end previous edit and start a new one
+			lastLine = editLine;
+	
+			compoundEdit.end();
 			compoundEdit = startCompoundEdit(e.getEdit());
-			startCombine = false;
-			return;
+			
+			updateDocUndoFlags();
+		} else {
+			logger.fine("Not working");
 		}
-
-		int editLine = ((SyntaxDocument)docEvt.getDocument()).getLineNumberAt(docEvt.getOffset());
-
-		//  Check for an incremental edit or backspace.
-		//  The Change in Caret position and Document length should both be
-		//  either 1 or -1.
-		if ((startCombine || Math.abs(docEvt.getLength()) == 1) && editLine == lastLine) {
-			compoundEdit.addEdit(e.getEdit());
-			startCombine = false;
-			return;
-		}
-
-		//  Not incremental edit, end previous edit and start a new one
-		lastLine = editLine;
-
-		compoundEdit.end();
-		compoundEdit = startCompoundEdit(e.getEdit());
+	}
+	
+	private void updateDocUndoFlags() {
+		doc.setCanUndo(canUndo());
+		doc.setCanRedo(canRedo());
+	}
+	
+	@Override
+	protected void undoTo(UndoableEdit edit) throws CannotUndoException {
+		super.undoTo(edit);
+		updateDocUndoFlags();
+	}
+	
+	@Override
+	public synchronized void undo() throws CannotUndoException {
+		super.undo();
+		updateDocUndoFlags();
+	}
+	
+	@Override
+	protected void redoTo(UndoableEdit edit) throws CannotRedoException {
+		super.redoTo(edit);
+		updateDocUndoFlags();
+	}
+	
+	@Override
+	public synchronized void redo() throws CannotRedoException {
+		super.redo();
+		updateDocUndoFlags();
 	}
 
 	/*
@@ -90,7 +140,7 @@ public class CompoundUndoMan extends UndoManager {
 	 */
 	private CompoundEdit startCompoundEdit(UndoableEdit anEdit) {
 		//  Track Caret and Document information of this compound edit
-		AbstractDocument.DefaultDocumentEvent docEvt = (DefaultDocumentEvent) anEdit;
+		//AbstractDocument.DefaultDocumentEvent docEvt = (DefaultDocumentEvent) anEdit;
 
 		//  The compound edit is used to store incremental edits
 
