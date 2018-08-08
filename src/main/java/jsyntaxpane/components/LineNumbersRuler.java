@@ -227,14 +227,16 @@ public class LineNumbersRuler extends JPanel
 		for (int line = topLine; line <= bottomLine; line++) {
 			String lineNumber = String.format(numbersFormat, line);
 			int y = line * lh;
+			Color color = getBackground();
 			if (line == currentLine) {
-				g.setColor(currentLineColor);
-				g.fillRect(0, y - lh + fontMetrics.getDescent() - 1, getWidth(), lh);
-				g.setColor(getForeground());
-				g.drawString(lineNumber, insets.left, y);
-			} else {
-				g.drawString(lineNumber, insets.left, y);
+				color = currentLineColor;
 			}
+			// always need to redraw background for Java 10 to prevent 
+			// text from leaking into line number ruler
+			g.setColor(color);
+			g.fillRect(0, y - lh + fontMetrics.getDescent() - 1, getWidth(), lh);
+			g.setColor(getForeground());
+			g.drawString(lineNumber, insets.left, y);
 		}
 	}
 
