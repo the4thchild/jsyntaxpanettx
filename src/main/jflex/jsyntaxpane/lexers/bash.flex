@@ -57,7 +57,10 @@ InputCharacter = [^\r\n]
 
 Identifier = [a-zA-Z][a-zA-Z0-9_]*
 
-Comment = "#"  {InputCharacter}* {LineTerminator}?
+Comment = {TraditionalComment} | {EndOfLineComment} 
+
+TraditionalComment = ": '"~"'"
+EndOfLineComment = "#" {InputCharacter}* {LineTerminator}?
 Shebang = "#!" {InputCharacter}* {LineTerminator}?
 
 StringCharacter = [^\r\n\"\\]
