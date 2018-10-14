@@ -1,4 +1,6 @@
-/*
+/* 
+ * Copyright 2018 David Young david@textflex.com
+ * based on original file by
  * Copyright 2008 Ayman Al-Sairafi ayman.alsairafi@gmail.com
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); 
@@ -16,6 +18,8 @@ package jsyntaxpane.components;
 import java.beans.PropertyChangeEvent;
 import jsyntaxpane.actions.*;
 import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,7 +39,8 @@ import jsyntaxpane.util.Configuration;
  * 
  * @author Ayman Al-Sairafi
  */
-public class TokenMarker implements SyntaxComponent, CaretListener, PropertyChangeListener {
+public class TokenMarker implements SyntaxComponent, CaretListener, 
+		PropertyChangeListener, MouseMotionListener {
 
     public static final String DEFAULT_TOKENTYPES = "IDENTIFIER, TYPE, TYPE2, TYPE3";
     public static final String PROPERTY_COLOR = "TokenMarker.Color";
@@ -52,11 +57,30 @@ public class TokenMarker implements SyntaxComponent, CaretListener, PropertyChan
     public TokenMarker() {
     }
 
+    /**
+     * Update token after caret update.
+     * @param e caret event to find the caret position
+     */
     @Override
     public void caretUpdate(CaretEvent e) {
+        // will not fire until after mouse selection completed
         markTokenAt(e.getDot());
     }
 
+    /**
+     * Update token at start of selection, which will remove any existing 
+     * token there to avoid masking selection highlight by token highlight.
+     * @param e mouse event, not used
+     */
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        markTokenAt(pane.getSelectionStart());
+    }
+    
+    @Override
+    public void mouseMoved(MouseEvent e) {
+    }
+    
     public void markTokenAt(int pos) {
         SyntaxDocument doc = ActionUtils.getSyntaxDocument(pane);
         if (doc != null) {
@@ -121,6 +145,7 @@ public class TokenMarker implements SyntaxComponent, CaretListener, PropertyChan
     public void install(JEditorPane editor) {
         this.pane = editor;
         pane.addCaretListener(this);
+        pane.addMouseMotionListener(this);
         markTokenAt(editor.getCaretPosition());
         status = Status.INSTALLING;
     }
