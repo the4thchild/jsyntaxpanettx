@@ -155,6 +155,7 @@ public class TokenMarker implements SyntaxComponent, CaretListener,
         status = Status.DEINSTALLING;
         removeMarkers();
         pane.removeCaretListener(this);
+        pane.removeMouseMotionListener(this);
     }
     private static final Logger LOG = Logger.getLogger(TokenMarker.class.getName());
 
@@ -162,8 +163,10 @@ public class TokenMarker implements SyntaxComponent, CaretListener,
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("document")) {
                 pane.removeCaretListener(this);
+        		pane.removeMouseMotionListener(this);
             if (status.equals(Status.INSTALLING)) {
                 pane.addCaretListener(this);
+                pane.addMouseMotionListener(this);
                 removeMarkers();
             }
         }
