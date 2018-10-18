@@ -1,21 +1,21 @@
 # JSyntaxPaneTTx
 
-JSyntaxPaneTTx is a fork of [JSyntaxPane](https://code.google.com/archive/p/jsyntaxpane/) customized for use in the [Text Trix](https://github.com/the4thchild/texttrix) editor.
+JSyntaxPaneTTx is a fork of [JSyntaxPane](https://code.google.com/archive/p/jsyntaxpane/), a syntax highlighting library built in Java.
 
 Additional features in this fork include:
 
-* Support extended from Java 6 through 10
+* Support extended from Java 6 through 11
 * Customizable font size
 * Additional language support (just the basics so far): Perl, Nasal
-* Integration with Text Trix
+* Initially forked for use in the [Text Trix](https://github.com/the4thchild/texttrix) editor
 
-The JSyntaxPaneTTx library can be used in Text Trix or independently in other text editors for syntax highlighting.
+The JSyntaxPaneTTx library can be used independently in other Java-based text editors for syntax highlighting.
 
 ## Compile
 
 ### Dependencies
 
-* Java 6+ (mostly tested on Java 8-10)
+* JDK 6+ (mostly tested on 8-11)
 * Maven
 
 ### Build
