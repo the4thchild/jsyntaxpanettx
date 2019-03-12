@@ -127,7 +127,7 @@ BackQuoteChars  = [^\r\n\`\\]
   "continue"                    { return token(TokenType.KEYWORD); }
 
   /* string literal */
-  \"{StringCharacter}+\"        |
+  \"{StringCharacter}*\"        |
 
   \'{SingleCharacter}+\         { return token(TokenType.STRING); }
 
