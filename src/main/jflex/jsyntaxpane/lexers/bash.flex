@@ -129,7 +129,7 @@ BackQuoteChars  = [^\r\n\`\\]
   /* string literal */
   \"{StringCharacter}*\"        |
 
-  \'{SingleCharacter}+\         { return token(TokenType.STRING); }
+  \'{SingleCharacter}*\'         { return token(TokenType.STRING); }
 
   \`{BackQuoteChars}+\`         { return token(TokenType.STRING2); }
 
