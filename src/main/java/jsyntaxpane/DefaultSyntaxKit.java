@@ -108,6 +108,9 @@ public class DefaultSyntaxKit extends StyledEditorKit implements ViewFactory {
 		int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 		if(menuMask == KeyEvent.ALT_DOWN_MASK) {
 			MENU_MASK_STRING = "alt ";
+		} else if (menuMask == KeyEvent.META_MASK) {
+			// Mac-style shortcuts
+			MENU_MASK_STRING = "meta ";
 		}
 	}
 	private static final String ACTION_MENU_TEXT = "MenuText";
