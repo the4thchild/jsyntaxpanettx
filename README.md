@@ -4,31 +4,31 @@ JSyntaxPaneTTx is a fork of [JSyntaxPane](https://code.google.com/archive/p/jsyn
 
 Additional features in this fork include:
 
-* Support extended from Java 6 through 11
+* Support extended from Java 6 through 14
 * Customizable font size
 * Additional language support (just the basics so far): Perl, Nasal
-* Initially forked for use in the [Text Trix](https://github.com/the4thchild/texttrix) editor
-
-The JSyntaxPaneTTx library can be used independently in other Java-based text editors for syntax highlighting.
+* Initially forked for use in the [Text Trix](https://github.com/yoda-vid/texttrix) editor but can be used independently in Java-based text editors for syntax highlighting
 
 ## Compile
 
 ### Dependencies
 
-* JDK 6+ (mostly tested on 8-11)
+* JDK 6+ (mostly tested on 8-14)
 * Maven
 
 ### Build
 
+Download this library and output a `.jar` file to the `target` folder:
+
 ```
-# output a .jar file to target folder
-git clone https://github.com/the4thchild/jsyntaxpanettx.git
+git clone https://github.com/yoda-vid/jsyntaxpanettx.git
 cd jsyntaxpanettx
 mvn package
+```
 
-# alternatively, build from within texttrix for use there; 
-# assume texttrix has been cloned already to a directory 
-# alongside jsyntaxpanettx
+Alternatively, build from within [Text Trix](https://github.com/yoda-vid/texttrix). Assuming that `texttrix` has been cloned already to a directory next to `jsyntaxpanettx`:
+
+```
 texttrix/build.sh --jsyn
 ```
 
